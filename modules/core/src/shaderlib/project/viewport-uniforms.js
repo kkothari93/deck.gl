@@ -34,6 +34,7 @@ const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 const DEFAULT_PIXELS_PER_UNIT2 = [0, 0, 0];
 const DEFAULT_COORDINATE_ORIGIN = [0, 0, 0];
+const EXPERIMENTAL_LNG_LAT_ZOOM_THRESHOLD = 12;
 
 const getMemoizedViewportUniforms = memoize(calculateViewportUniforms);
 
@@ -54,8 +55,18 @@ function calculateMatrixAndOffset({
   let {viewProjectionMatrix} = viewport;
 
   let projectionCenter;
+  let usedCoordinateSystem = coordinateSystem;
+  let usedCoordinateOrigin = coordinateOrigin;
 
-  switch (coordinateSystem) {
+  if (coordinateSystem === COORDINATE_SYSTEM.EXPERIMENTAL_LNG_LAT) {
+    if (coordinateZoom < EXPERIMENTAL_LNG_LAT_ZOOM_THRESHOLD) {
+      usedCoordinateSystem = COORDINATE_SYSTEM.LNGLAT;
+    } else {
+      usedCoordinateOrigin = [viewport.longitude, viewport.latitude];
+    }
+  }
+
+  switch (usedCoordinateSystem) {
     case COORDINATE_SYSTEM.IDENTITY:
     case COORDINATE_SYSTEM.LNGLAT:
       projectionCenter = ZERO_VECTOR;
@@ -64,10 +75,11 @@ function calculateMatrixAndOffset({
     // TODO: make lighting work for meter offset mode
     case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
     case COORDINATE_SYSTEM.METER_OFFSETS:
+    case COORDINATE_SYSTEM.EXPERIMENTAL_LNG_LAT:
       // Calculate transformed projectionCenter (using 64 bit precision JS)
       // This is the key to offset mode precision
       // (avoids doing this addition in 32 bit precision in GLSL)
-      const positionPixels = viewport.projectFlat(coordinateOrigin, Math.pow(2, coordinateZoom));
+      const positionPixels = viewport.projectFlat(usedCoordinateOrigin, Math.pow(2, coordinateZoom));
       // projectionCenter = new Matrix4(viewProjectionMatrix)
       //   .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
       projectionCenter = vec4_transformMat4(
@@ -94,7 +106,9 @@ function calculateMatrixAndOffset({
     viewMatrix,
     viewProjectionMatrix,
     projectionCenter,
-    cameraPos: viewport.cameraPosition
+    cameraPos: viewport.cameraPosition,
+    usedCoordinateSystem,
+    usedCoordinateOrigin
   };
 }
 
@@ -144,7 +158,13 @@ function calculateViewportUniforms({
   const coordinateZoom = viewport.zoom;
   assert(coordinateZoom >= 0);
 
-  const {projectionCenter, viewProjectionMatrix, cameraPos} = calculateMatrixAndOffset({
+  const {
+    projectionCenter,
+    viewProjectionMatrix,
+    cameraPos,
+    usedCoordinateSystem,
+    usedCoordinateOrigin
+  } = calculateMatrixAndOffset({
     coordinateSystem,
     coordinateOrigin,
     coordinateZoom,
@@ -160,7 +180,7 @@ function calculateViewportUniforms({
 
   const uniforms = {
     // Projection mode values
-    project_uCoordinateSystem: coordinateSystem,
+    project_uCoordinateSystem: usedCoordinateSystem,
     project_uCenter: projectionCenter,
 
     // Screen size
@@ -181,15 +201,18 @@ function calculateViewportUniforms({
     project_uCameraPosition: cameraPos
   };
 
-  if (coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS) {
-    const distanceScalesAtOrigin = viewport.getDistanceScales(coordinateOrigin);
+  if (usedCoordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS) {
+    const distanceScalesAtOrigin = viewport.getDistanceScales(usedCoordinateOrigin);
     uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerMeter;
     uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerMeter2;
   }
-  if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT_OFFSETS) {
-    const distanceScalesAtOrigin = viewport.getDistanceScales(coordinateOrigin);
+  if (usedCoordinateSystem === COORDINATE_SYSTEM.LNGLAT_OFFSETS || usedCoordinateSystem === COORDINATE_SYSTEM.EXPERIMENTAL_LNG_LAT) {
+    const distanceScalesAtOrigin = viewport.getDistanceScales(usedCoordinateOrigin);
     uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerDegree;
     uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerDegree2;
+  }
+  if (usedCoordinateSystem === COORDINATE_SYSTEM.EXPERIMENTAL_LNG_LAT) {
+    uniforms.project_coordinate_origin = usedCoordinateOrigin;
   }
 
   return uniforms;

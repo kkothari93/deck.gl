@@ -24,6 +24,7 @@ const float COORDINATE_SYSTEM_IDENTITY = 0.;
 const float COORDINATE_SYSTEM_LNG_LAT = 1.;
 const float COORDINATE_SYSTEM_METER_OFFSETS = 2.;
 const float COORDINATE_SYSTEM_LNGLAT_OFFSETS = 3.;
+const float COORDINATE_SYSTEM_EXPERIMENTAL_LNG_LAT = 4.;
 
 uniform float project_uCoordinateSystem;
 uniform float project_uScale;
@@ -38,6 +39,7 @@ uniform vec2 project_uViewportSize;
 uniform float project_uDevicePixelRatio;
 uniform float project_uFocalDistance;
 uniform vec3 project_uCameraPosition;
+uniform vec2 project_coordinate_origin;
 
 const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
@@ -103,6 +105,10 @@ vec4 project_position(vec4 position) {
       project_scale(position.z),
       position.w
     );
+  }
+
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_EXPERIMENTAL_LNG_LAT) {
+    return project_offset_(vec4(position.x - project_coordinate_origin.x, position.y - project_coordinate_origin.y, position.z, position.w));
   }
 
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
