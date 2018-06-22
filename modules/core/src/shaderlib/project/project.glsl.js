@@ -97,7 +97,7 @@ vec2 project_mercator_(vec2 lnglat) {
 //
 // Projects lnglats (or meter offsets, depending on mode) to pixels
 //
-vec4 project_position(vec4 position) {
+vec4 project_position(vec4 position, vec2 positionLOW) {
   // TODO - why not simply subtract center and fall through?
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT) {
     return project_uModelMatrix * vec4(
@@ -108,7 +108,9 @@ vec4 project_position(vec4 position) {
   }
 
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_EXPERIMENTAL_LNG_LAT) {
-    return project_offset_(vec4(position.x - project_coordinate_origin.x, position.y - project_coordinate_origin.y, position.z, position.w));
+    float X = position.x - project_coordinate_origin.x;
+    float Y = position.y - project_coordinate_origin.y;
+    return project_offset_(vec4(X + positionLOW.x, Y + positionLOW.y, position.z, position.w));
   }
 
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
@@ -119,6 +121,15 @@ vec4 project_position(vec4 position) {
   // Apply model matrix
   vec4 position_modelspace = project_uModelMatrix * position;
   return project_offset_(position_modelspace);
+}
+
+vec4 project_position(vec4 position) {
+  return project_position(position, vec2(0.0, 0.0));
+}
+
+vec3 project_position(vec3 position, vec2 positionLOW) {
+  vec4 projected_position = project_position(vec4(position, 1.0), positionLOW);
+  return projected_position.xyz;
 }
 
 vec3 project_position(vec3 position) {

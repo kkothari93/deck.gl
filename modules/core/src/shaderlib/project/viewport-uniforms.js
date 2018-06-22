@@ -62,7 +62,9 @@ function calculateMatrixAndOffset({
     if (coordinateZoom < EXPERIMENTAL_LNG_LAT_ZOOM_THRESHOLD) {
       usedCoordinateSystem = COORDINATE_SYSTEM.LNGLAT;
     } else {
-      usedCoordinateOrigin = [viewport.longitude, viewport.latitude];
+      const x = Math.fround(viewport.longitude);
+      const y = Math.fround(viewport.latitude);
+      usedCoordinateOrigin = [x, y];
     }
   }
 
@@ -79,7 +81,10 @@ function calculateMatrixAndOffset({
       // Calculate transformed projectionCenter (using 64 bit precision JS)
       // This is the key to offset mode precision
       // (avoids doing this addition in 32 bit precision in GLSL)
-      const positionPixels = viewport.projectFlat(usedCoordinateOrigin, Math.pow(2, coordinateZoom));
+      const positionPixels = viewport.projectFlat(
+        usedCoordinateOrigin,
+        Math.pow(2, coordinateZoom)
+      );
       // projectionCenter = new Matrix4(viewProjectionMatrix)
       //   .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
       projectionCenter = vec4_transformMat4(
@@ -206,7 +211,10 @@ function calculateViewportUniforms({
     uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerMeter;
     uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerMeter2;
   }
-  if (usedCoordinateSystem === COORDINATE_SYSTEM.LNGLAT_OFFSETS || usedCoordinateSystem === COORDINATE_SYSTEM.EXPERIMENTAL_LNG_LAT) {
+  if (
+    usedCoordinateSystem === COORDINATE_SYSTEM.LNGLAT_OFFSETS ||
+    usedCoordinateSystem === COORDINATE_SYSTEM.EXPERIMENTAL_LNG_LAT
+  ) {
     const distanceScalesAtOrigin = viewport.getDistanceScales(usedCoordinateOrigin);
     uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerDegree;
     uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerDegree2;

@@ -130,13 +130,13 @@ export default class LineLayer extends Layer {
   }
 
   calculateInstanceSourceTargetPositions64xyLow(attribute) {
-    const isFP64 = this.is64bitEnabled();
-    attribute.isGeneric = !isFP64;
+    // const isFP64 = this.is64bitEnabled();
+    // attribute.isGeneric = !isFP64;
 
-    if (!isFP64) {
-      attribute.value = new Float32Array(4);
-      return;
-    }
+    // if (!isFP64) {
+    //   attribute.value = new Float32Array(4);
+    //   return;
+    // }
 
     const {data, getSourcePosition, getTargetPosition} = this.props;
     const {value, size} = attribute;
