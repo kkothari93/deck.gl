@@ -42,41 +42,45 @@ class App extends Component {
   }
 
   _onViewStateChange({viewState}) {
-    this.setState({
-      viewState: {...this.state.viewState, ...viewState}
-    });
+    this.setState({viewState});
+  }
+
+  _renderLayers() {
+    const {
+      data = DATA_URL,
+      cellSize = 20
+    } = this.props;
+
+    return [
+      new ScreenGridLayer({
+        id: 'grid',
+        data,
+        minColor: [0, 0, 0, 0],
+        getPosition: d => d,
+        cellSizePixels: cellSize
+      })
+    ];
   }
 
   render() {
     const {
-      data = DATA_URL,
-      cellSize = 20,
-
       onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState,
-
-      mapboxApiAccessToken = MAPBOX_TOKEN,
-      mapStyle = 'mapbox://styles/mapbox/dark-v9'
+      viewState = this.state.viewState
     } = this.props;
-
-    const layer = new ScreenGridLayer({
-      id: 'grid',
-      data,
-      minColor: [0, 0, 0, 0],
-      getPosition: d => d,
-      cellSizePixels: cellSize
-    });
 
     return (
       <MapGL
         {...viewState}
         reuseMaps
         onViewportChange={viewport => onViewStateChange({viewState: viewport})}
-        mapStyle={mapStyle}
+        mapStyle='mapbox://styles/mapbox/dark-v9'
         preventStyleDiffing={true}
-        mapboxApiAccessToken={mapboxApiAccessToken}
+        mapboxApiAccessToken={MAPBOX_TOKEN}
       >
-        <DeckGL layers={[layer]} views={new MapView({id: 'map'})} viewState={viewState} />;
+        <DeckGL
+          layers={this._renderLayers}
+          views={new MapView({id: 'map'})}
+          viewState={viewState} />;
       </MapGL>
     );
   }

@@ -116,18 +116,12 @@ class App extends Component {
     this._animationFrame = window.requestAnimationFrame(this._animateData.bind(this));
   }
 
-  render() {
+  _renderLayers() {
     const {
-      data = DATA_URL,
-
-      onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState,
-
-      mapboxApiAccessToken = MAPBOX_TOKEN,
-      mapStyle = MAPBOX_STYLE
+      data = DATA_URL
     } = this.props;
 
-    const layers = [
+    return [
       new TextLayer({
         id: 'hashtag-layer',
         data,
@@ -136,10 +130,17 @@ class App extends Component {
         getSize: d => d.size
       })
     ];
+  }
+
+  render() {
+    const {
+      onViewStateChange = this._onViewStateChange.bind(this),
+      viewState = this.state.viewState
+    } = this.props;
 
     return (
       <DeckGL
-        layers={layers}
+        layers={this._renderLayers()}
         views={new MapView({id: 'map'})}
         viewState={viewState}
         onViewStateChange={onViewStateChange}
@@ -149,9 +150,9 @@ class App extends Component {
           viewId="map"
           {...viewState}
           reuseMaps
-          mapStyle={mapStyle}
+          mapStyle={MAPBOX_STYLE}
           preventStyleDiffing={true}
-          mapboxApiAccessToken={mapboxApiAccessToken}
+          mapboxApiAccessToken={MAPBOX_TOKEN}
         />
       </DeckGL>
     );

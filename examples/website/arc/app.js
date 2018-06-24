@@ -121,20 +121,14 @@ class App extends Component {
     this.setState({arcs});
   }
 
-  render() {
+  _renderLayers() {
     const {
       strokeWidth = 2,
       onHover = this._onHover.bind(this),
       onClick = this._onClick.bind(this),
-
-      onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState,
-
-      mapboxApiAccessToken = MAPBOX_TOKEN,
-      mapStyle = 'mapbox://styles/mapbox/light-v9'
     } = this.props;
 
-    const layers = [
+    return [
       new GeoJsonLayer({
         id: 'geojson',
         data: this.state.counties,
@@ -155,10 +149,17 @@ class App extends Component {
         strokeWidth
       })
     ];
+  }
+
+  render() {
+    const {
+      onViewStateChange = this._onViewStateChange.bind(this),
+      viewState = this.state.viewState
+    } = this.props;
 
     return (
       <DeckGL
-        layers={layers}
+        layers={this._renderLayers()}
         views={new MapView({id: 'map'})}
         viewState={viewState}
         onViewStateChange={onViewStateChange}
@@ -169,9 +170,9 @@ class App extends Component {
           viewId="map"
           {...viewState}
           reuseMaps
-          mapStyle={mapStyle}
+          mapStyle='mapbox://styles/mapbox/light-v9'
           preventStyleDiffing={true}
-          mapboxApiAccessToken={mapboxApiAccessToken}
+          mapboxApiAccessToken={MAPBOX_TOKEN}
         />
       </DeckGL>
     );
