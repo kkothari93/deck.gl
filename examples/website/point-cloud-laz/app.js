@@ -22,11 +22,6 @@ const INITIAL_VIEW_STATE = {
   maxDistance: 3
 };
 
-const WEBGL_PARAMETERS = {
-  clearColor: [0.07, 0.14, 0.19, 1],
-  blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA]
-};
-
 function normalize(points) {
   let xMin = Infinity;
   let yMin = Infinity;
@@ -70,7 +65,7 @@ class Example extends PureComponent {
     };
 
     this._onResize = this._onResize.bind(this);
-    this._onViewportChange = this._onViewportChange.bind(this);
+    this._onViewStateChange = this._onViewStateChange.bind(this);
     this._onUpdate = this._onUpdate.bind(this);
   }
 
@@ -112,10 +107,10 @@ class Example extends PureComponent {
         fov: this.state.viewState.fov
       })
     });
-    this._onViewportChange(newViewState, {});
+    this._onViewStateChange(newViewState, {});
   }
 
-  _onViewportChange(viewState, interactiveState) {
+  _onViewStateChange(viewState, interactiveState) {
     this.setState({
       rotating: !interactiveState.isDragging,
       viewState: {...this.state.viewState, ...viewState}
@@ -166,8 +161,11 @@ class Example extends PureComponent {
         viewState={viewState}
         controller={OrbitController}
         layers={[this._renderLazPointCloudLayer()]}
-        parameters={WEBGL_PARAMETERS}
-        onViewportChange={this._onViewportChange}
+        onViewStateChange={this._onViewStateChange}
+        parameters={{
+          clearColor: [0.07, 0.14, 0.19, 1],
+          blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA]
+        }}
       />
     );
   }

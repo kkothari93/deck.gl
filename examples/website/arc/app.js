@@ -125,7 +125,7 @@ class App extends Component {
     const {
       strokeWidth = 2,
       onHover = this._onHover.bind(this),
-      onClick = this._onClick.bind(this),
+      onClick = this._onClick.bind(this)
     } = this.props;
 
     return [
@@ -164,16 +164,17 @@ class App extends Component {
         viewState={viewState}
         onViewStateChange={onViewStateChange}
         controller={MapController}
-        pickingRadius={10}
       >
-        <StaticMap
-          viewId="map"
-          {...viewState}
-          reuseMaps
-          mapStyle='mapbox://styles/mapbox/light-v9'
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-        />
+        {!window.demoLauncherActive && (
+          <StaticMap
+            viewId="map"
+            viewState={viewState}
+            reuseMaps
+            mapStyle="mapbox://styles/mapbox/light-v9"
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        )}
       </DeckGL>
     );
   }

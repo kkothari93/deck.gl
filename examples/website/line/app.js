@@ -26,11 +26,6 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-const WEBGL_PARAMETERS = {
-  blendFunc: [GL.SRC_ALPHA, GL.ONE, GL.ONE_MINUS_DST_ALPHA, GL.ONE],
-  blendEquation: GL.FUNC_ADD
-};
-
 function getColor(d) {
   const z = d.start[2];
   const r = z / 10000;
@@ -103,18 +98,21 @@ class App extends Component {
         viewState={viewState}
         onViewStateChange={onViewStateChange}
         controller={MapController}
-        parameters={WEBGL_PARAMETERS}
+        parameters={{
+          blendFunc: [GL.SRC_ALPHA, GL.ONE, GL.ONE_MINUS_DST_ALPHA, GL.ONE],
+          blendEquation: GL.FUNC_ADD
+        }}
       >
-        {!window.demoLauncherActive &&
-        <StaticMap
-          viewId="map"
-          {...viewState}
-          reuseMaps
-          mapStyle='mapbox://styles/mapbox/dark-v9'
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-        />
-        }
+        {!window.demoLauncherActive && (
+          <StaticMap
+            viewId="map"
+            viewState={viewState}
+            reuseMaps
+            mapStyle="mapbox://styles/mapbox/dark-v9"
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        )}
       </DeckGL>
     );
   }

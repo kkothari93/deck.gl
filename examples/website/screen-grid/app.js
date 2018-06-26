@@ -1,8 +1,8 @@
 /* global document, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import MapGL from 'react-map-gl';
-import DeckGL, {MapView, ScreenGridLayer} from 'deck.gl';
+import {StaticMap} from 'react-map-gl';
+import DeckGL, {MapView, MapController, ScreenGridLayer} from 'deck.gl';
 
 const INITIAL_VIEW_STATE = {
   longitude: -119.3,
@@ -28,28 +28,12 @@ class App extends Component {
     };
   }
 
-  componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
-  }
-
-  _resize() {
-    const viewState = Object.assign(this.state.viewState, {
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-    this._onViewStateChange({viewState});
-  }
-
   _onViewStateChange({viewState}) {
     this.setState({viewState});
   }
 
   _renderLayers() {
-    const {
-      data = DATA_URL,
-      cellSize = 20
-    } = this.props;
+    const {data = DATA_URL, cellSize = 20} = this.props;
 
     return [
       new ScreenGridLayer({
@@ -69,19 +53,24 @@ class App extends Component {
     } = this.props;
 
     return (
-      <MapGL
-        {...viewState}
-        reuseMaps
-        onViewportChange={viewport => onViewStateChange({viewState: viewport})}
-        mapStyle='mapbox://styles/mapbox/dark-v9'
-        preventStyleDiffing={true}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
+      <DeckGL
+        layers={this._renderLayers()}
+        views={new MapView({id: 'map'})}
+        viewState={viewState}
+        onViewStateChange={onViewStateChange}
+        controller={MapController}
       >
-        <DeckGL
-          layers={this._renderLayers}
-          views={new MapView({id: 'map'})}
-          viewState={viewState} />;
-      </MapGL>
+        {!window.demoLauncherActive && (
+          <StaticMap
+            viewId="map"
+            viewState={viewState}
+            reuseMaps
+            mapStyle="mapbox://styles/mapbox/dark-v9"
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        )}
+      </DeckGL>
     );
   }
 }

@@ -81,9 +81,9 @@ class App extends Component {
         {!window.demoLauncherActive && (
           <StaticMap
             viewId="map"
-            {...viewState}
+            viewState={viewState}
             reuseMaps
-            mapStyle='mapbox://styles/mapbox/light-v9'
+            mapStyle="mapbox://styles/mapbox/light-v9"
             preventStyleDiffing={true}
             mapboxApiAccessToken={MAPBOX_TOKEN}
           />

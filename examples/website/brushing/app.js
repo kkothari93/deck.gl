@@ -64,9 +64,6 @@ class App extends Component {
 
   /* eslint-disable react/no-did-mount-set-state */
   componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
-
     this.setState({
       ...this._getLayerData(this.props)
     });
@@ -79,14 +76,6 @@ class App extends Component {
         ...this._getLayerData(nextProps)
       });
     }
-  }
-
-  _resize() {
-    const viewState = Object.assign(this.state.viewState, {
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-    this._onViewStateChange({viewState});
   }
 
   _onViewStateChange({viewState}) {
@@ -206,7 +195,7 @@ class App extends Component {
       opacity = 0.7,
 
       mouseEntered = this.state.mouseEntered,
-      mousePosition = this.state.mousePosition,
+      mousePosition = this.state.mousePosition
       // onHover = this._onHover.bind(this),
     } = this.props;
 
@@ -298,16 +287,16 @@ class App extends Component {
           onViewStateChange={onViewStateChange}
           controller={MapController}
         >
-          {!window.demoLauncherActive &&
-          <StaticMap
-            viewId="map"
-            {...viewState}
-            reuseMaps
-            mapStyle='mapbox://styles/mapbox/light-v9'
-            preventStyleDiffing={true}
-            mapboxApiAccessToken={MAPBOX_TOKEN}
-          />
-          }
+          {!window.demoLauncherActive && (
+            <StaticMap
+              viewId="map"
+              viewState={viewState}
+              reuseMaps
+              mapStyle="mapbox://styles/mapbox/light-v9"
+              preventStyleDiffing={true}
+              mapboxApiAccessToken={MAPBOX_TOKEN}
+            />
+          )}
         </DeckGL>
       </div>
     );

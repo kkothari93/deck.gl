@@ -17,6 +17,19 @@ class DemoLauncher extends Component {
     };
   }
 
+  componentDidMount() {
+    /* global window */
+    window.addEventListener('resize', this._resize.bind(this));
+    this._resize();
+  }
+
+  _resize() {
+    this.setState({
+      width: window.innerWidth,
+      height: window.innerHeight
+    });
+  }
+
   componentWillMount() {
     this._loadDemo(this.props.demo, false);
   }
@@ -95,17 +108,21 @@ class DemoLauncher extends Component {
   }
 
   // Add map wrapper, use for examples that havn't yet been updated to render their own maps
-  _renderMap(component) {
+  _renderMap(mapStyle, component) {
     const {viewport, isInteractive} = this.props;
+
+    mapStyle = mapStyle || viewport.mapStyle || MAPBOX_STYLES.BLANK;
 
     return (
       <MapGL
         mapboxApiAccessToken={MapboxAccessToken}
         preventStyleDiffing={true}
-        mapStyle={viewport.mapStyle || MAPBOX_STYLES.BLANK}
+        mapStyle={mapStyle}
         reuseMap
 
-        {...viewport}
+        width={this.state.width}
+        height={this.state.height}
+        viewState={viewport}
         onViewStateChange={isInteractive ? this._updateMapViewState : undefined}>
 
         {component}
@@ -132,6 +149,7 @@ class DemoLauncher extends Component {
         onMouseLeave={this.state.trackMouseMove ? this._onMouseLeave : null}>
 
         {this._renderMap(
+          DemoComponent.mapStyle,
           <DemoComponent
             ref="demo"
 

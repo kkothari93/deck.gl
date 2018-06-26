@@ -74,8 +74,6 @@ class App extends Component {
   }
 
   componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
     this._animate();
   }
 
@@ -87,14 +85,6 @@ class App extends Component {
 
   componentWillUnmount() {
     this._stopAnimate();
-  }
-
-  _resize() {
-    const viewState = Object.assign(this.state.viewState, {
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-    this._onViewStateChange({viewState});
   }
 
   _onViewStateChange({viewState}) {
@@ -128,12 +118,7 @@ class App extends Component {
   }
 
   _renderLayers() {
-    const {
-      data = this.state.data,
-      radius = 1000,
-      upperPercentile = 100,
-      coverage = 1
-    } = this.props;
+    const {data = this.state.data, radius = 1000, upperPercentile = 100, coverage = 1} = this.props;
 
     return [
       new HexagonLayer({
@@ -172,9 +157,9 @@ class App extends Component {
         {!window.demoLauncherActive && (
           <StaticMap
             viewId="map"
-            {...viewState}
+            viewState={viewState}
             reuseMaps
-            mapStyle='mapbox://styles/mapbox/dark-v9'
+            mapStyle="mapbox://styles/mapbox/dark-v9"
             preventStyleDiffing={true}
             mapboxApiAccessToken={MAPBOX_TOKEN}
           />

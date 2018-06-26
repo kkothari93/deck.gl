@@ -5,6 +5,7 @@ import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL, {MapView, MapController, TextLayer} from 'deck.gl';
 import {setParameters} from 'luma.gl';
+import GL from 'luma.gl/constants';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -40,8 +41,6 @@ class App extends Component {
   }
 
   componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
     this._loadData();
   }
 
@@ -49,14 +48,6 @@ class App extends Component {
     if (this._animationFrame) {
       window.cancelAnimationFrame(this._animationFrame);
     }
-  }
-
-  _resize() {
-    const viewState = Object.assign(this.state.viewState, {
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-    this._onViewStateChange({viewState});
   }
 
   _onViewStateChange({viewState}) {
@@ -117,9 +108,7 @@ class App extends Component {
   }
 
   _renderLayers() {
-    const {
-      data = DATA_URL
-    } = this.props;
+    const {data = DATA_URL} = this.props;
 
     return [
       new TextLayer({
@@ -145,15 +134,21 @@ class App extends Component {
         viewState={viewState}
         onViewStateChange={onViewStateChange}
         controller={MapController}
+        parameters={{
+          blendFunc: [GL.SRC_ALPHA, GL.ONE, GL.ONE_MINUS_DST_ALPHA, GL.ONE],
+          blendEquation: GL.FUNC_ADD
+        }}
       >
-        <StaticMap
-          viewId="map"
-          {...viewState}
-          reuseMaps
-          mapStyle={MAPBOX_STYLE}
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-        />
+        {!window.demoLauncherActive && (
+          <StaticMap
+            viewId="map"
+            viewState={viewState}
+            reuseMaps
+            mapStyle={MAPBOX_STYLE}
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        )}
       </DeckGL>
     );
   }

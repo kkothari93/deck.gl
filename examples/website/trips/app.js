@@ -43,24 +43,10 @@ export default class App extends Component {
     };
   }
 
-  componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
-    this._animate();
-  }
-
   componentWillUnmount() {
     if (this._animationFrame) {
       window.cancelAnimationFrame(this._animationFrame);
     }
-  }
-
-  _resize() {
-    const viewState = Object.assign(this.state.viewState, {
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-    this._onViewStateChange({viewState});
   }
 
   _onViewStateChange({viewState}) {
@@ -131,9 +117,9 @@ export default class App extends Component {
         {!window.demoLauncherActive && (
           <StaticMap
             viewId="map"
-            {...viewState}
+            viewState={viewState}
             reuseMaps
-            mapStyle='mapbox://styles/mapbox/dark-v9'
+            mapStyle="mapbox://styles/mapbox/dark-v9"
             preventStyleDiffing={true}
             mapboxApiAccessToken={MAPBOX_TOKEN}
           />

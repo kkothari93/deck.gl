@@ -35,19 +35,6 @@ class App extends Component {
     this._loadData();
   }
 
-  componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
-  }
-
-  _resize() {
-    const viewState = Object.assign(this.state.viewState, {
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-    this._onViewStateChange({viewState});
-  }
-
   _onViewStateChange({viewState}) {
     this.setState({
       viewState: {...this.state.viewState, ...viewState}
@@ -64,13 +51,9 @@ class App extends Component {
   }
 
   _renderLayers() {
-    const {
-      data = DATA_URL,
-      cluster = true,
-      fontSize = 32
-    } = this.props;
+    const {data = DATA_URL, cluster = true, fontSize = 32} = this.props;
 
-   return [
+    return [
       cluster
         ? new TagmapLayer({
             id: 'twitter-topics-tagmap',
@@ -106,14 +89,16 @@ class App extends Component {
         onViewStateChange={onViewStateChange}
         controller={MapController}
       >
-        <StaticMap
-          viewId="map"
-          {...viewState}
-          reuseMaps
-          mapStyle={MAPBOX_STYLE}
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-        />
+        {!window.demoLauncherActive && (
+          <StaticMap
+            viewId="map"
+            viewState={viewState}
+            reuseMaps
+            mapStyle={MAPBOX_STYLE}
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        )}
       </DeckGL>
     );
   }

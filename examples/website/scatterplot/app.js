@@ -55,7 +55,7 @@ class App extends Component {
       data = DATA_URL,
       radius = 30,
       maleColor = MALE_COLOR,
-      femaleColor = FEMALE_COLOR,
+      femaleColor = FEMALE_COLOR
     } = this.props;
 
     return [
@@ -77,7 +77,7 @@ class App extends Component {
   render() {
     const {
       onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState,
+      viewState = this.state.viewState
     } = this.props;
 
     return (
@@ -88,16 +88,16 @@ class App extends Component {
         onViewStateChange={onViewStateChange}
         controller={MapController}
       >
-        {!window.demoLauncherActive &&
-        <StaticMap
-          viewId="map"
-          {...viewState}
-          reuseMaps
-          mapStyle='mapbox://styles/mapbox/light-v9'
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-        />
-        }
+        {!window.demoLauncherActive && (
+          <StaticMap
+            viewId="map"
+            {...viewState}
+            reuseMaps
+            mapStyle="mapbox://styles/mapbox/light-v9"
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        )}
       </DeckGL>
     );
   }
